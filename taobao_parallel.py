@@ -42,13 +42,24 @@ async def get_evaluations(detail_url):
                                                                                          re.S) else None
     store = re.findall(r'class="ShopHeader--title--2qsBE1A".*?title="(.*?)"', await page.content(), re.S) if re.findall(
         r'class="ShopHeader--title--2qsBE1A".*?title="(.*?)"', await page.content(), re.S) else None
-    button = await page.querySelectorAll('.Tabs--title--1Ov7S5f ')
-    await button[1].click()
-    await asyncio.sleep(1)
-    evaluations = re.findall(r'<div class="Comment--content--15w7fKj">(.*?)</div>', await page.content(),
-                             re.S) if re.findall(r'<div class="Comment--content--15w7fKj">(.*?)</div>',
+    button = await page.querySelector('.Comments--tabDetailItemTitle--2BFfLMr')
+    await button.click()
+    await button.click()
+    await asyncio.sleep(2)
+    await page.evaluate("""{window.scrollBy(0, document.body.scrollHeight);}""")
+    await asyncio.sleep(2)
+    print(page.content())
+    evaluations = re.findall(r'<div class="Comment--content--22pGCmW">(.*?)</div>', await page.content(),
+                             re.S) if re.findall(r'<div class="Comment--content--22pGCmW">(.*?)</div>',
                                                  await page.content(), re.S) else None
+    photo = re.findall('<img data-once="true" src="(.*?)"', await page.content(), re.S) if re.findall(
+        r'<img data-once="true" src="(.*?)"', await page.content(), re.S) else None
     logging.info('已完成对%s店铺的%s的爬取,评论为%s', store, name, evaluations)
+
+    for i, m in zip(photo, range(0, 10)):
+        with open(r"D:\python1\bug\bug_exercise\taobao_photo\{n}_{m}.jpg".format(m=m,n=name), "wb") as b:
+            r = requests.get('https:' + i)
+            b.write(r.content)
     await browser.close()
     return {
         'name': name,
